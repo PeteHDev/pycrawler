@@ -51,3 +51,12 @@ def get_images_from_html(html, base_url):
     soup = BeautifulSoup(html, "html.parser")
     images = soup.find_all("img")
     return extract_urls(images, base_url, "src")
+
+def extract_page_data(html, page_url):
+    extracted_data = {}
+    extracted_data["url"] = page_url.rstrip("/")
+    extracted_data["h1"] = get_h1_from_html(html)
+    extracted_data["first_paragraph"] = get_first_paragraph_from_html(html)
+    extracted_data["outgoing_links"] = sorted(get_urls_from_html(html, page_url))
+    extracted_data["image_urls"] = sorted(get_images_from_html(html, page_url))
+    return extracted_data

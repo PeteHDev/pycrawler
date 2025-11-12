@@ -273,6 +273,123 @@ class TestUrlsFromHtml(unittest.TestCase):
         expected = ["https://blog.boot.dev/same.html"]
         self.assertEqual(sorted(set(actual)), sorted(expected))
 
+class TestDataExtract(unittest.TestCase):
+    def test_extract_page_data_basic(self):
+        input_url = "https://blog.boot.dev"
+        input_body = '''<html><body>
+            <h1>Test Title</h1>
+            <p>This is the first paragraph.</p>
+            <a href="/link1">Link 1</a>
+            <img src="/image1.jpg" alt="Image 1">
+        </body></html>'''
+        actual = extract_page_data(input_body, input_url)
+        expected = {
+            "url": "https://blog.boot.dev",
+            "h1": "Test Title",
+            "first_paragraph": "This is the first paragraph.",
+            "outgoing_links": ["https://blog.boot.dev/link1"],
+            "image_urls": ["https://blog.boot.dev/image1.jpg"]
+        }
+        self.assertDictEqual(actual, expected)
+
+    def test_extract_page_data_nodata(self):
+        input_url = "https://blog.boot.dev"
+        input_body = '''<html><body>
+            <spank>Test Title</spank>
+            <spank>This is the first paragraph.</spank>
+            <spank>Link 1</spank>
+        </body></html>'''
+        actual = extract_page_data(input_body, input_url)
+        expected = {
+            "url": "https://blog.boot.dev",
+            "h1": "",
+            "first_paragraph": "",
+            "outgoing_links": [],
+            "image_urls": []
+        }
+        self.assertDictEqual(actual, expected)
+
+    def test_extract_page_data_no_links(self):
+        input_url = "https://blog.boot.dev"
+        input_body = '''<html><body>
+            <h1>Test Title</h1>
+            <p>This is the first paragraph.</p>
+            <a href="">Link 1</a>
+            <a href=" ">Link 2</a>
+            <a href="mailto:wiz@den">Email</a>
+            <a href="javascript:void(0)">JS</a>
+            <a href="tel:+123456">Phone</a>
+            <img src="" alt="Image 1">
+            <img src=" " alt="Image 2">
+            <img src="data:image/png;base64,AAAA" alt="inline">
+        </body></html>'''
+        actual = extract_page_data(input_body, input_url)
+        expected = {
+            "url": "https://blog.boot.dev",
+            "h1": "Test Title",
+            "first_paragraph": "This is the first paragraph.",
+            "outgoing_links": [],
+            "image_urls": []
+        }
+        self.assertDictEqual(actual, expected)
+
+    def test_extract_page_data_mixed(self):
+        input_url = "https://blog.boot.dev/"
+        input_body = '''
+        <html>
+            <body>
+                <h1>TITLE!!!</h1>
+                <p>Wrong first paragraph</p>
+                <main>
+                    <p>Correct first paragraph</p>
+                </main>
+                <a href="https://blog.boot.dev"><span>Boot.dev</span></a>
+                <a href="https://blog.boot.dev/absolutepage1.html"><span>Absolute 1</span></a>
+                <a href="/relativepage1.html"><span>Relative 1</span></a>
+                <a href="/relativepage2.html"><span>Relative 2</span></a>
+                <a href="https://blog.boot.dev/absolutepage2.html"><span>Absolute 2</span></a>
+                <a href="https://blog.boot.dev/absolutepage3.html"><span>Absolute 3</span></a>
+                <a href="/relativepage3.html"><span>Relative 3</span></a>
+                <a href="https://google.com"><span>Google:)))</span></a>
+                <a><span>Empty link</span></a>
+                <a href=""><span>Empty link again</span></a>
+                <a href=" "><span>Empty link again again</span></a>
+                <a href="/pagewithaquery?a=1#top"><span>Queried link</span></a>
+                <a href="mailto:wiz@den">Email</a>
+                <a href="javascript:void(0)">JS</a>
+                <a href="tel:+123456">Phone</a>
+                <img alt="No source image">
+                <img src="" alt="Empty source image">
+                <img src=" " alt="Empty source image again">
+                <img src="data:image/png;base64,AAAA" alt="inline">
+                <img src="/logo1.png" alt="Logo 1">
+                <img src="https://blog.boot.dev/logo2.png" alt="Logo 2">
+                <img src="https://picsum.photos/200" alt="Lorem Picsum">
+                <img src="https://blog.boot.dev/logo2.png?a=1#top" alt="Queried image">
+            </body>
+        </html>'''
+        actual = extract_page_data(input_body, input_url)
+        expected = {
+            "url": "https://blog.boot.dev",
+            "h1": "TITLE!!!",
+            "first_paragraph": "Correct first paragraph",
+            "outgoing_links": sorted([
+                    "https://blog.boot.dev",
+                    "https://blog.boot.dev/absolutepage1.html",
+                    "https://blog.boot.dev/relativepage1.html",
+                    "https://blog.boot.dev/relativepage2.html",
+                    "https://blog.boot.dev/absolutepage2.html",
+                    "https://blog.boot.dev/absolutepage3.html",
+                    "https://blog.boot.dev/relativepage3.html",
+                    "https://google.com",
+                    "https://blog.boot.dev/pagewithaquery?a=1#top"]),
+            "image_urls": sorted([
+                    "https://blog.boot.dev/logo1.png",
+                    "https://blog.boot.dev/logo2.png",
+                    "https://picsum.photos/200",
+                    "https://blog.boot.dev/logo2.png?a=1#top"])
+        }
+        self.assertDictEqual(actual, expected)
 
 if __name__ == "__main__":
     unittest.main()
