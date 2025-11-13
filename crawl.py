@@ -2,6 +2,29 @@ from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup
 import requests
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+def print_error(error_msg):
+    if not error_msg is str:
+        error_msg = str(error_msg)
+    print(bcolors.FAIL + error_msg + bcolors.ENDC)
+
+def print_warning(warning_msg):
+    print(bcolors.WARNING + warning_msg + bcolors.ENDC)
+
+def print_list(list):
+    for item in list:
+        print(item)
+
 def normalize_url(url):
     parsed = urlparse(url)
     return parsed.hostname + parsed.path.rstrip("/")
@@ -28,7 +51,7 @@ def get_first_paragraph_from_html(html):
     return first_paragraph.get_text()
 
 def extract_urls(links, base_url, look_for="href"):
-    urls = []
+    urls = set()
     for link in links:
         val = link.get(look_for)
         if not val:
@@ -39,7 +62,7 @@ def extract_urls(links, base_url, look_for="href"):
         url = urljoin(base_url, ref)
         scheme = url.split(":", 1)[0].lower()
         if scheme in ("http", "https"):
-             urls.append(url)
+             urls.add(url)
 
     return urls
 
@@ -69,6 +92,43 @@ def get_html(url):
     if not content_type:
         raise Exception(f"{url} has Content-Type header missing")
     elif not "text/html" in content_type.lower():
-        raise Exception("Content-type is not text/html")
+        raise TypeError("Content-type is not text/html")
     
     return response.text
+
+def crawl_page(base_url, current_url=None, page_data=None):
+    if current_url is None:
+        current_url = base_url
+    else:
+        base_parsed = urlparse(base_url)
+        current_parsed = urlparse(current_url)
+        if base_parsed.hostname != current_parsed.hostname:
+            return
+        
+    if page_data is None:
+        page_data = {}
+        
+    current_normalized = normalize_url(current_url)
+    if current_normalized in page_data:
+        return
+    
+    html = None
+    try:
+        html = get_html(current_url)
+    except TypeError as te:
+        print_error(te)
+        page_data[current_normalized] = "No text/html"
+        return
+    except Exception as e:
+        print_error(e)
+        page_data[current_normalized] = "Something went wrong"
+        return
+    
+    print("Crawling " + current_url + "(" + current_normalized + ")")
+    data = extract_page_data(html, current_url)
+    page_data[current_normalized] = data
+    for link in data["outgoing_links"]:
+        crawl_page(base_url, link, page_data)
+
+    return page_data
+

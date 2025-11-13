@@ -129,14 +129,14 @@ class TestUrlsFromHtml(unittest.TestCase):
         input_url = "https://blog.boot.dev"
         input_body = '<html><body><a href="https://blog.boot.dev"><span>Boot.dev</span></a></body></html>'
         actual = get_urls_from_html(input_body, input_url)
-        expected = ["https://blog.boot.dev"]
+        expected = set(["https://blog.boot.dev"])
         self.assertEqual(actual, expected)
 
     def test_get_urls_from_html_relative(self):
         input_url = "https://blog.boot.dev"
         input_body = '<html><body><a href="/somepage.html"><span>Boot.dev</span></a></body></html>'
         actual = get_urls_from_html(input_body, input_url)
-        expected = ["https://blog.boot.dev/somepage.html"]
+        expected = set(["https://blog.boot.dev/somepage.html"])
         self.assertEqual(actual, expected)
 
     def test_get_urls_from_html_none(self):
@@ -150,7 +150,7 @@ class TestUrlsFromHtml(unittest.TestCase):
             </body>
         </html>'''
         actual = get_urls_from_html(input_body, input_url)
-        expected = []
+        expected = set()
         self.assertEqual(actual, expected)
 
     def test_get_urls_from_html_mixed(self):
@@ -174,7 +174,7 @@ class TestUrlsFromHtml(unittest.TestCase):
             </body>
         </html>'''
         actual = get_urls_from_html(input_body, input_url)
-        expected = ["https://blog.boot.dev",
+        expected = set(["https://blog.boot.dev",
                     "https://blog.boot.dev/absolutepage1.html",
                     "https://blog.boot.dev/relativepage1.html",
                     "https://blog.boot.dev/relativepage2.html",
@@ -182,21 +182,21 @@ class TestUrlsFromHtml(unittest.TestCase):
                     "https://blog.boot.dev/absolutepage3.html",
                     "https://blog.boot.dev/relativepage3.html",
                     "https://google.com",
-                    "https://blog.boot.dev/pagewithaquery?a=1#top"]
+                    "https://blog.boot.dev/pagewithaquery?a=1#top"])
         self.assertEqual(sorted(actual), sorted(expected))
 
     def test_get_images_from_html_absolute(self):
         input_url = "https://blog.boot.dev"
         input_body = '<html><body><img src="https://blog.boot.dev/logo.png" alt="Logo"></body></html>'
         actual = get_images_from_html(input_body, input_url)
-        expected = ["https://blog.boot.dev/logo.png"]
+        expected = set(["https://blog.boot.dev/logo.png"])
         self.assertEqual(actual, expected)
 
     def test_get_images_from_html_relative(self):
         input_url = "https://blog.boot.dev"
         input_body = '<html><body><img src="/logo.png" alt="Logo"></body></html>'
         actual = get_images_from_html(input_body, input_url)
-        expected = ["https://blog.boot.dev/logo.png"]
+        expected = set(["https://blog.boot.dev/logo.png"])
         self.assertEqual(actual, expected)
 
     def test_get_images_from_html_none(self):
@@ -211,7 +211,7 @@ class TestUrlsFromHtml(unittest.TestCase):
             </body>
         </html>'''
         actual = get_images_from_html(input_body, input_url)
-        expected = []
+        expected = set()
         self.assertEqual(actual, expected)
 
     def test_get_images_from_html_mixed(self):
@@ -229,10 +229,10 @@ class TestUrlsFromHtml(unittest.TestCase):
             </body>
         </html>'''
         actual = get_images_from_html(input_body, input_url)
-        expected = ["https://blog.boot.dev/logo1.png",
+        expected = set(["https://blog.boot.dev/logo1.png",
                     "https://blog.boot.dev/logo2.png",
                     "https://picsum.photos/200",
-                    "https://blog.boot.dev/logo2.png?a=1#top"]
+                    "https://blog.boot.dev/logo2.png?a=1#top"])
         self.assertEqual(sorted(actual), sorted(expected))
 
     def test_get_urls_from_html_ignore_non_http(self):
@@ -271,7 +271,7 @@ class TestUrlsFromHtml(unittest.TestCase):
         '''
         actual = get_urls_from_html(input_body, input_url)
         expected = ["https://blog.boot.dev/same.html"]
-        self.assertEqual(sorted(set(actual)), sorted(expected))
+        self.assertEqual(sorted(actual), sorted(expected))
 
 class TestDataExtract(unittest.TestCase):
     def test_extract_page_data_basic(self):
