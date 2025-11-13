@@ -1,5 +1,6 @@
 import sys
-from crawl import get_html, crawl_page, print_list
+import asyncio
+from crawl import print_list, AsyncCrawler
 
 # Chapter 2, lesson 1:
 # def main():
@@ -48,7 +49,11 @@ def report(page_data):
                 print(" --- " + url)
         print()
 
-def main():
+async def crawl_site_async(base_url, max_concurrency=3):
+    async with AsyncCrawler(base_url, max_concurrency) as crawler:
+        return await crawler.crawl()
+
+async def main():
     page_data = None
     if len(sys.argv) < 2:
         print("no website provided")
@@ -57,7 +62,7 @@ def main():
         print("too many arguments provided")
         sys.exit(1)
     else:
-        page_data = crawl_page(sys.argv[1])
+        page_data = await crawl_site_async(sys.argv[1], 10)
 
     print()
     print("==============================")
@@ -67,6 +72,8 @@ def main():
 
     report(page_data)
 
+    # print("DONE")
+
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
