@@ -181,7 +181,6 @@ class TestUrlsFromHtml(unittest.TestCase):
                     "https://blog.boot.dev/absolutepage2.html",
                     "https://blog.boot.dev/absolutepage3.html",
                     "https://blog.boot.dev/relativepage3.html",
-                    "https://google.com",
                     "https://blog.boot.dev/pagewithaquery?a=1#top"])
         self.assertEqual(sorted(actual), sorted(expected))
 
@@ -231,7 +230,6 @@ class TestUrlsFromHtml(unittest.TestCase):
         actual = get_images_from_html(input_body, input_url)
         expected = set(["https://blog.boot.dev/logo1.png",
                     "https://blog.boot.dev/logo2.png",
-                    "https://picsum.photos/200",
                     "https://blog.boot.dev/logo2.png?a=1#top"])
         self.assertEqual(sorted(actual), sorted(expected))
 
@@ -381,12 +379,10 @@ class TestDataExtract(unittest.TestCase):
                     "https://blog.boot.dev/absolutepage2.html",
                     "https://blog.boot.dev/absolutepage3.html",
                     "https://blog.boot.dev/relativepage3.html",
-                    "https://google.com",
                     "https://blog.boot.dev/pagewithaquery?a=1#top"]),
             "image_urls": sorted([
                     "https://blog.boot.dev/logo1.png",
                     "https://blog.boot.dev/logo2.png",
-                    "https://picsum.photos/200",
                     "https://blog.boot.dev/logo2.png?a=1#top"])
         }
         self.assertDictEqual(actual, expected)

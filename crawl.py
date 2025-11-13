@@ -52,14 +52,21 @@ def get_first_paragraph_from_html(html):
 
 def extract_urls(links, base_url, look_for="href"):
     urls = set()
+    base_parsed = urlparse(base_url)
     for link in links:
         val = link.get(look_for)
         if not val:
             continue
+
         ref = link.get(look_for).strip()
         if not ref:
             continue
+
         url = urljoin(base_url, ref)
+        url_parsed = urlparse(url)
+        if url_parsed.hostname != base_parsed.hostname:
+            continue
+        
         scheme = url.split(":", 1)[0].lower()
         if scheme in ("http", "https"):
              urls.add(url)
