@@ -49,20 +49,38 @@ def report(page_data):
                 print(" --- " + url)
         print()
 
-async def crawl_site_async(base_url, max_concurrency=3):
-    async with AsyncCrawler(base_url, max_concurrency) as crawler:
+async def crawl_site_async(base_url, max_pages = 100, max_concurrency=3):
+    async with AsyncCrawler(base_url, max_pages, max_concurrency) as crawler:
         return await crawler.crawl()
 
 async def main():
     page_data = None
+    crawler_parameters = []
     if len(sys.argv) < 2:
         print("no website provided")
         sys.exit(1)
-    elif len(sys.argv) > 2:
+    elif len(sys.argv) > 4:
         print("too many arguments provided")
         sys.exit(1)
-    else:
-        page_data = await crawl_site_async(sys.argv[1], 10)
+
+    crawler_parameters.append(sys.argv[1])
+    if len(sys.argv) > 2:
+        try:
+            max_pages = int(sys.argv[2])
+            crawler_parameters.append(max_pages)
+        except ValueError:
+            print("Invalid <max pages> value")
+            sys.exit(1)
+    if len(sys.argv) > 3:
+        try:
+            max_concurrency = int(sys.argv[3])
+            crawler_parameters.append(max_concurrency)
+        except ValueError:
+            print("Invalid <max concurrency> value")
+            sys.exit(1)
+            
+    print(crawler_parameters)
+    page_data = await crawl_site_async(*crawler_parameters)
 
     print()
     print("==============================")
