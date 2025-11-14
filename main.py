@@ -1,6 +1,7 @@
 import sys
 import asyncio
 from crawl import print_list, AsyncCrawler
+from csv_report import write_csv_report
 
 # Chapter 2, lesson 1:
 # def main():
@@ -82,15 +83,7 @@ async def main():
     print(crawler_parameters)
     page_data = await crawl_site_async(*crawler_parameters)
 
-    print()
-    print("==============================")
-    print("============REPORT============")
-    print("==============================")
-    print()
-
-    report(page_data)
-
-    # print("DONE")
+    write_csv_report(page_data)
 
 
 if __name__ == "__main__":
