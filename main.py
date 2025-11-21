@@ -2,6 +2,7 @@ import sys
 import asyncio
 from crawl import print_list, AsyncCrawler
 from csv_report import write_csv_report
+# import requests
 
 # Chapter 2, lesson 1:
 # def main():
@@ -12,7 +13,7 @@ from csv_report import write_csv_report
 #         print("too many arguments provided")
 #         sys.exit(1)
 #     else:
-#         print(f"Starting crawl of: {sys.argv[1]}")
+#         print(f"starting crawl of: {sys.argv[1]}")
 
 #Chapter 2, lesson 2
 # def main():
@@ -28,6 +29,20 @@ from csv_report import write_csv_report
 #             print(get_html(sys.argv[1]))
 #         except Exception as e:
 #             print(e)
+
+# def get_html(url):
+#     response = requests.get(url, headers={"User-Agent": "BootCrawler/1.0"})
+#     print(response)
+#     if response.status_code > 399:
+#         print(f"Error: HTTP {response.status} for {url}")
+#         return None
+
+#     content_type = response.headers.get("content-type", "")
+#     if "text/html" not in content_type:
+#         print(f"Error: Non-HTML content {content_type} for {url}")
+#         return None
+
+#     return response.text
 
 def report(page_data):
     for key in page_data:
@@ -82,9 +97,8 @@ async def main():
             
     print(crawler_parameters)
     page_data = await crawl_site_async(*crawler_parameters)
-
+    
     write_csv_report(page_data)
-
 
 if __name__ == "__main__":
     asyncio.run(main())

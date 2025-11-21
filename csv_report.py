@@ -5,7 +5,7 @@ def write_csv_report(page_data, file_name="report.csv"):
         writer = csv.DictWriter(csvfile, fieldnames=["page_url",
                                             "h1",
                                             "first_paragraph",
-                                            "outgoing_links",
+                                            "outgoing_link_urls",
                                             "image_urls"])
         writer.writeheader()
         for page in page_data:
@@ -15,7 +15,7 @@ def write_csv_report(page_data, file_name="report.csv"):
                 "page_url": page_data[page]["url"],
                 "h1": page_data[page]["h1"],
                 "first_paragraph": page_data[page]["first_paragraph"],
-                "outgoing_links": outgoing_links,
+                "outgoing_link_urls": outgoing_links,
                 "image_urls": image_urls
             })
 
